@@ -13,7 +13,7 @@ import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
 
-    static Properties properties = new Properties();
+    private  static Properties properties = new Properties();
 
     public static void readProperties(String string) {
         try (FileInputStream in = new FileInputStream(string)) {
