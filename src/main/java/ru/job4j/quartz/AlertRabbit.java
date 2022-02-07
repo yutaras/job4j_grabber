@@ -5,10 +5,8 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
@@ -74,7 +72,7 @@ public class AlertRabbit {
             Connection cn = (Connection) (context.getJobDetail().getJobDataMap().get("connection"));
             try (PreparedStatement statement =
                          cn.prepareStatement("insert into rabbit(created_date) values (?)")) {
-                statement.setString(1, String.valueOf(System.currentTimeMillis()));
+                statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                 statement.execute();
             } catch (Exception e) {
                 e.printStackTrace();
