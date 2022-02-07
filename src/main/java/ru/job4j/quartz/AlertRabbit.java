@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -16,29 +17,31 @@ import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
 
-    private  static Properties properties = new Properties();
+    private static Properties properties = new Properties();
     private static Connection connection;
 
-    private static void initConnection() throws ClassNotFoundException, SQLException {
+    private static Connection initConnection(Properties properties) throws ClassNotFoundException, SQLException {
         Class.forName(properties.getProperty("driver_class"));
         String url = properties.getProperty("url");
         String login = properties.getProperty("login");
         String password = properties.getProperty("password");
         connection = DriverManager.getConnection(url, login, password);
+        return connection;
     }
 
-    public static void readProperties(String string) {
+    public static Properties readProperties(String string) {
         try (FileInputStream in = new FileInputStream(string)) {
             properties.load(in);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return properties;
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        readProperties("src/main/resources/rabbit.properties");
+        Properties pr = readProperties("src/main/resources/rabbit.properties");
         try {
-            initConnection();
+            initConnection(pr);
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -47,7 +50,7 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(properties.getProperty("time")))
+                    .withIntervalInSeconds(Integer.parseInt(pr.getProperty("time")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -65,6 +68,14 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
+            Connection cn = (Connection) (context.getJobDetail().getJobDataMap().get("connection"));
+            try (PreparedStatement statement =
+                         cn.prepareStatement("insert into rabbit(created_date) values (?)")) {
+                statement.setString(1, String.valueOf(System.currentTimeMillis()));
+                statement.execute();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
