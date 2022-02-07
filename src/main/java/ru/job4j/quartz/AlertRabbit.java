@@ -37,7 +37,7 @@ public class AlertRabbit {
         return properties;
     }
 
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+    public static void main(String[] args) {
         Properties pr = readProperties("src/main/resources/rabbit.properties");
         try (Connection connection = initConnection(pr)) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -63,8 +63,13 @@ public class AlertRabbit {
     }
 
     public static class Rabbit implements Job {
+
+        public Rabbit() {
+            System.out.println(hashCode());
+        }
+
         @Override
-        public void execute(JobExecutionContext context) throws JobExecutionException {
+        public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
             Connection cn = (Connection) (context.getJobDetail().getJobDataMap().get("connection"));
             try (PreparedStatement statement =
