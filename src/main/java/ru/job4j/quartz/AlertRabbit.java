@@ -18,15 +18,14 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
 
     private static Properties properties = new Properties();
-    private static Connection connection;
 
     private static Connection initConnection(Properties properties) throws ClassNotFoundException, SQLException {
         Class.forName(properties.getProperty("driver_class"));
         String url = properties.getProperty("url");
         String login = properties.getProperty("login");
         String password = properties.getProperty("password");
-        connection = DriverManager.getConnection(url, login, password);
-        return connection;
+        return DriverManager.getConnection(url, login, password);
+
     }
 
     public static Properties readProperties(String string) {
@@ -40,8 +39,7 @@ public class AlertRabbit {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         Properties pr = readProperties("src/main/resources/rabbit.properties");
-        try {
-            initConnection(pr);
+        try (Connection connection = initConnection(pr)) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -59,7 +57,7 @@ public class AlertRabbit {
             scheduler.scheduleJob(job, trigger);
             Thread.sleep(10000);
             scheduler.shutdown();
-        } catch (SchedulerException | InterruptedException se) {
+        } catch (Exception se) {
             se.printStackTrace();
         }
     }
