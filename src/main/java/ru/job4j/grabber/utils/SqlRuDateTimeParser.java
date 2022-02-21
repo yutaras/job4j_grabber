@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 public class SqlRuDateTimeParser implements DateTimeParser {
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
     private static final Map<String, String> MONTHS = Map.ofEntries(
             Map.entry("янв", "1"),
@@ -26,15 +27,14 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     @Override
     public LocalDateTime parse(String parse) {
         String[] twoParts = parse.split(",");
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         LocalTime time = LocalTime.parse(twoParts[1].replace(" ", ""), dtf);
         String[] partsOfDate = twoParts[0].split(" ");
         LocalDate date = LocalDate.of(2000 + Integer.parseInt(partsOfDate[2]),
                 Integer.parseInt(MONTHS.get(partsOfDate[1])),
                 Integer.parseInt(partsOfDate[0]));
-        LocalDateTime date1 = LocalDateTime.of(date, time);
-        System.out.println(date1);
-        return date1;
+        LocalDateTime ldt = LocalDateTime.of(date, time);
+        System.out.println(ldt);
+        return ldt;
     }
 
     public static void main(String[] args) {
