@@ -13,7 +13,8 @@ import java.util.Map;
 
 public class SqlRuDateTimeParser implements DateTimeParser {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
-    public static LocalDate date;
+    private static final String TODAY = "сегодня";
+    private static final String YESTERDAY = "вчера";
 
     private static final Map<String, String> MONTHS = Map.ofEntries(
             Map.entry("янв", "1"),
@@ -32,13 +33,14 @@ public class SqlRuDateTimeParser implements DateTimeParser {
 
     @Override
     public LocalDateTime parse(String parse) {
+        LocalDate date;
         String[] twoParts = parse.split(",");
         LocalTime time = LocalTime.parse(twoParts[1].replace(" ", ""),
                 FORMATTER);
         String[] partsOfDate = twoParts[0].split(" ");
-        if ("сегодня".equals(twoParts[0])) {
+        if (TODAY.equals(twoParts[0])) {
             date = LocalDate.now();
-        } else if ("вчера".equals(twoParts[0])) {
+        } else if (YESTERDAY.equals(twoParts[0])) {
             date = LocalDate.now().minusDays(1);
         } else {
             date = LocalDate.of(2000 + Integer.parseInt(partsOfDate[2]),
