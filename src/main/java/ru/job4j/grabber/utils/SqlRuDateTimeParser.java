@@ -1,5 +1,10 @@
 package ru.job4j.grabber.utils;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -7,7 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 public class SqlRuDateTimeParser implements DateTimeParser {
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+    public static LocalDate date;
 
     private static final Map<String, String> MONTHS = Map.ofEntries(
             Map.entry("янв", "1"),
@@ -27,19 +33,28 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     @Override
     public LocalDateTime parse(String parse) {
         String[] twoParts = parse.split(",");
-        LocalTime time = LocalTime.parse(twoParts[1].replace(" ", ""), dtf);
+        LocalTime time = LocalTime.parse(twoParts[1].replace(" ", ""),
+                FORMATTER);
         String[] partsOfDate = twoParts[0].split(" ");
-        LocalDate date = LocalDate.of(2000 + Integer.parseInt(partsOfDate[2]),
-                Integer.parseInt(MONTHS.get(partsOfDate[1])),
-                Integer.parseInt(partsOfDate[0]));
-        LocalDateTime ldt = LocalDateTime.of(date, time);
-        System.out.println(ldt);
-        return ldt;
+        if ("сегодня".equals(twoParts[0])) {
+            date = LocalDate.now();
+        } else if ("вчера".equals(twoParts[0])) {
+            date = LocalDate.now().minusDays(1);
+        } else {
+            date = LocalDate.of(2000 + Integer.parseInt(partsOfDate[2]),
+                    Integer.parseInt(MONTHS.get(partsOfDate[1])),
+                    Integer.parseInt(partsOfDate[0]));
+        }
+        return LocalDateTime.of(date, time);
     }
 
-    public static void main(String[] args) {
-        String data = "2 дек 22, 10:50";
+    public static void main(String[] args) throws Exception {
         SqlRuDateTimeParser sql = new SqlRuDateTimeParser();
-        sql.parse(data);
+        Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers").get();
+        Elements row = doc.select(".postslisttopic");
+        for (Element td : row) {
+            Element time = td.parent().child(5);
+            System.out.println(sql.parse(time.text()));
+        }
     }
 }

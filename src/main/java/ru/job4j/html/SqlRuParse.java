@@ -16,7 +16,5 @@ public class SqlRuParse {
             Element time = td.parent().child(5);
             System.out.println(time.text());
         }
-
-
     }
 }
