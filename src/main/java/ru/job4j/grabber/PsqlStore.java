@@ -2,7 +2,10 @@ package ru.job4j.grabber;
 
 import ru.job4j.html.Post;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -17,7 +20,6 @@ public class PsqlStore implements Store, AutoCloseable {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        /* cnn = DriverManager.getConnection(...); */
         cnn = DriverManager.getConnection(
                 cfg.getProperty("url"),
                 cfg.getProperty("username"),
@@ -96,6 +98,28 @@ public class PsqlStore implements Store, AutoCloseable {
     }
 
     public static void main(String[] args) {
+        try (InputStream in = PsqlStore.class.getClassLoader()
+                .getResourceAsStream("app.properties")) {
+            Properties config = new Properties();
+            config.load(in);
+            PsqlStore psql = new PsqlStore(config);
+            LocalDateTime today = LocalDateTime.now();
+            Post post1 = new Post("java разработчик",
+                    "https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t ",
+                    "требуется java разработчик",
+                     today);
+            Post post2 = new Post("программист sql",
+                    "https://www.sql.ru/forum/1339644/vakansiya-programmista-sql-udalenka-ofis-v-msk-zp-120-000-200-000",
+                    "требуется программист sql",
+                    today);
+            psql.save(post1);
+            psql.save(post2);
+            System.out.println(psql.findById(2));
+            System.out.println(psql.getAll());
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+        }
+
 
     }
 }
