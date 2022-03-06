@@ -39,3 +39,10 @@ from company c
 join person p 
 on p.company_id = c.id
 where c.id != 5;
+
+select  c.name,COUNT(*) as "Количество человек"
+from company c
+join person p 
+on p.company_id = c.id
+GROUP BY company_id, c.name
+ORDER BY COUNT(*) DESC
