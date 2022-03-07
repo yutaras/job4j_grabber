@@ -2,7 +2,7 @@ CREATE TABLE company
 (
     id integer NOT NULL,
     name character varying,
-    CONSTRAINT company_pkey PRIMARY KEY (id)
+    ConSTRAINT company_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE person
@@ -10,10 +10,10 @@ CREATE TABLE person
     id integer NOT NULL,
     name character varying,
     company_id integer references company(id),
-    CONSTRAINT person_pkey PRIMARY KEY (id)
+    ConSTRAINT person_pkey PRIMARY KEY (id)
 );
 
-select * from company
+SELECT * FROM company
 insert into company(id,name) values (7,'BMW');
 insert into company(id,name) values (1,'Mersedes');
 insert into company(id,name) values (2,'AUDI');
@@ -34,15 +34,28 @@ insert into person(id,name,company_id ) values (9,'Рафаэль',5);
 insert into person(id,name,company_id ) values (10,'Лео',5);
 
 
-select p.name, c.name
-from company c
-join person p 
+SELECT p.name, c.name
+FROM company c
+JOIN person p 
 on p.company_id = c.id
 where c.id != 5;
 
-select  c.name,COUNT(*) as "Количество человек"
-from company c
-join person p 
+WITH temp AS (
+SELECT  c.name,COUNT(p.company_id) AS "количество"
+FROM company c JOIN person p 
 on p.company_id = c.id
-GROUP BY company_id, c.name
-ORDER BY COUNT(*) DESC LIMIT 1 
+GROUP BY c.name
+)
+SELECT * FROM temp WHERE temp.количество = (SELECT MAX(temp.количество) FROM temp);
+
+SELECT c.name, COUNT(p.company_id)
+FROM company c JOIN person p 
+on c.id = p.company_id
+GROUP BY c.name
+having COUNT(p.company_id) = 
+(SELECT  COUNT(*)
+FROM company c
+JOIN person p 
+on p.company_id = c.id
+GROUP BY company_id
+ORDER BY COUNT(*) DESC LIMIT 1);
