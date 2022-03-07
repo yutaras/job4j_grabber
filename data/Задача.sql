@@ -45,4 +45,4 @@ from company c
 join person p 
 on p.company_id = c.id
 GROUP BY company_id, c.name
-ORDER BY COUNT(*) DESC
+ORDER BY COUNT(*) DESC LIMIT 1 
