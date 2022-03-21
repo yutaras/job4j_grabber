@@ -18,7 +18,7 @@ public class GCDemo {
 
     public static void main(String[] args) {
         info();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
             new User(i, "N" + i);
         }
         System.gc();
