@@ -12,11 +12,11 @@ public class Emulator {
     public static void main(String[] args) throws IOException {
         System.out.println("Write cache directory: ");
         var sc = new Scanner(System.in);
-        var directory = sc.next();
+        var directory = sc.nextLine();
         Path path = Paths.get(directory);
         DirFileCache dirFileCache = new DirFileCache(directory);
         System.out.println("Write name of file for cash");
-        var nameOfFile = sc.next();
+        var nameOfFile = sc.nextLine();
         File file = new File(directory + "\\" + nameOfFile);
         if (Files.exists(path) && file.exists()) {
             dirFileCache.load(nameOfFile);
