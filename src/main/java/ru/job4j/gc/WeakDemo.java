@@ -11,8 +11,8 @@ public class WeakDemo {
 
     public static void main(String[] args) throws InterruptedException {
         example1();
-        //example2();
-        //example3();
+        /*example2();
+        example3();*/
     }
 
     private static void example1() throws InterruptedException {
